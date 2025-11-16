@@ -1,0 +1,1 @@
+Proyecto gestion de tareas monorepo basado en microservicios para implementar AWS.
