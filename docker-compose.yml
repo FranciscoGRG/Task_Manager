@@ -1,16 +1,41 @@
 version: "3.8"
 
 services:
-  db:
+  userdb:
     image: postgres:15
+    container_name: userdb
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: userdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-data:/var/lib/postgresql/data
+
+  taskdb:
+    image: postgres:15
+    container_name: taskdb
     environment:
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: dev
       POSTGRES_DB: taskdb
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - task-data:/var/lib/postgresql/data
+
+  notifdb:
+    image: postgres:15
+    container_name: notifdb
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: notifdb
+    ports:
+      - "5435:5432"
+    volumes:
+      - notif-data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio
@@ -19,11 +44,13 @@ services:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
     ports:
-      - "9000:9000"   # API S3 compatible
-      - "9001:9001"   # Consola de administración
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio-data:/data
 
 volumes:
-  db-data:
+  user-data:
+  task-data:
+  notif-data:
   minio-data:

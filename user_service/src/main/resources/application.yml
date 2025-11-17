@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/taskdb
+    url: jdbc:postgresql://localhost:5433/userdb
     username: dev
     password: dev
   jpa:
