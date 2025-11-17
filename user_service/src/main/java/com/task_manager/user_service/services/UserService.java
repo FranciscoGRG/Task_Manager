@@ -20,7 +20,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JwtService jwtService;
 
     public AuthResponseDto register(RegisterRequestDto dto) {
         if (userRepository.existsByUsername(dto.username())) {
@@ -33,7 +33,7 @@ public class UserService {
         newUser.setPasswordHahs(passwordEncoder.encode(dto.password()));
 
         User savedUser = userRepository.save(newUser);
-        String token = jwtProvider.createToken(savedUser.getUsername());
+        String token = jwtService.generateToken(savedUser);
 
         return new AuthResponseDto(token, savedUser.getEmail(), savedUser.getUsername());
     }
@@ -46,7 +46,7 @@ public class UserService {
             throw new RuntimeException("Credenciales invalidas");
         }
 
-        String token = jwtProvider.createToken(user.getUsername());
+        String token = jwtService.generateToken(user);
         return new AuthResponseDto(token, user.getEmail(), user.getUsername());
     }
 }
