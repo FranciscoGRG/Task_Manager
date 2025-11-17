@@ -33,7 +33,7 @@ public class UserService {
         newUser.setPasswordHahs(passwordEncoder.encode(dto.password()));
 
         User savedUser = userRepository.save(newUser);
-        String token = jwtService.generateToken(savedUser);
+        String token = jwtService.generateToken(savedUser, savedUser.getId());
 
         return new AuthResponseDto(token, savedUser.getEmail(), savedUser.getUsername());
     }
@@ -46,7 +46,7 @@ public class UserService {
             throw new RuntimeException("Credenciales invalidas");
         }
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(user, user.getId());
         return new AuthResponseDto(token, user.getEmail(), user.getUsername());
     }
 }
