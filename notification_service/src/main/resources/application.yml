@@ -1,0 +1,11 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/notifdb
+    username: dev
+    password: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
