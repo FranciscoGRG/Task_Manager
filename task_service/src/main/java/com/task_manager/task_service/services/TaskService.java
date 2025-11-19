@@ -10,6 +10,8 @@ import com.task_manager.task_service.dtos.TaskResponseDto;
 import com.task_manager.task_service.models.Task;
 import com.task_manager.task_service.repositories.ITaskRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class TaskService {
 
@@ -42,6 +44,7 @@ public class TaskService {
                 .toList();
     }
 
+    @Transactional
     public TaskResponseDto saveTask(TaskRequestDto request, Long userId) {
         Task task = new Task();
 
@@ -64,6 +67,7 @@ public class TaskService {
                 savedTask.getAttachmentUrl());
     }
 
+    @Transactional
     public void deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se ha encontrado la tarea con el id: " + id));
@@ -71,6 +75,7 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
+    @Transactional
     public TaskResponseDto updateTask(Long id, TaskRequestDto request) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se ha encontrado la tarea con el id: " + id));

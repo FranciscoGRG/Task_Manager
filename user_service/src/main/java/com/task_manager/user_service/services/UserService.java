@@ -10,6 +10,8 @@ import com.task_manager.user_service.dtos.RegisterRequestDto;
 import com.task_manager.user_service.models.User;
 import com.task_manager.user_service.repositories.IUserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
 
@@ -22,6 +24,7 @@ public class UserService {
     @Autowired
     private JwtService jwtService;
 
+    @Transactional
     public AuthResponseDto register(RegisterRequestDto dto) {
         if (userRepository.existsByUsername(dto.username())) {
             throw new RuntimeException("El username ya esta en uso");

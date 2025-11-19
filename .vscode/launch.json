@@ -20,6 +20,16 @@
             "projectName": "task_service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-NotificationServiceApplication<notification_service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.task_manager.notification_service.NotificationServiceApplication",
+            "projectName": "notification_service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
