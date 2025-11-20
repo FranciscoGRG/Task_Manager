@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.task_manager.task_service.clients.UserClient;
+import com.task_manager.task_service.dtos.TaskEventDto;
 import com.task_manager.task_service.dtos.TaskRequestDto;
 import com.task_manager.task_service.dtos.TaskResponseDto;
+import com.task_manager.task_service.dtos.UserDto;
 import com.task_manager.task_service.models.Task;
 import com.task_manager.task_service.repositories.ITaskRepository;
 
@@ -17,6 +20,12 @@ public class TaskService {
 
     @Autowired
     private ITaskRepository taskRepository;
+
+    @Autowired
+    private TaskEventPublisher taskEventPublisher;
+
+    @Autowired
+    private UserClient userClient;
 
     public TaskResponseDto getTaskById(Long id) {
         return taskRepository.findById(id)
@@ -46,6 +55,9 @@ public class TaskService {
 
     @Transactional
     public TaskResponseDto saveTask(TaskRequestDto request, Long userId) {
+        UserDto user = userClient.getUserById(userId);
+
+
         Task task = new Task();
 
         task.setUserId(userId);
@@ -56,6 +68,18 @@ public class TaskService {
         task.setAttachmentUrl(request.attachmentUrl());
 
         Task savedTask = taskRepository.save(task);
+
+        TaskEventDto taskEvent = new TaskEventDto(
+                "TASK_CREATED",
+                savedTask.getId(),
+                savedTask.getUserId(),
+                user.email(),
+                savedTask.getTitle(),
+                savedTask.getDescription(),
+                String.valueOf(savedTask.getDueDate())
+        );
+
+        taskEventPublisher.publishTaskEvent(taskEvent);
 
         return new TaskResponseDto(
                 savedTask.getId(),

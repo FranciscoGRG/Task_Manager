@@ -13,3 +13,7 @@ spring:
 jwt:
   secret: bXlfc3VwZXJfc2VjcmV0X2tleV9mb3Jfanp3dF9pbl9iYXNlNjQ= 
   expiration: 3600000 
+
+notification:
+  service:
+    url: http://localhost:8083/notifications/send

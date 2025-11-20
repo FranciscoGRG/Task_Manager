@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.task_manager.user_service.dtos.AuthResponseDto;
 import com.task_manager.user_service.dtos.LoginRequestDto;
 import com.task_manager.user_service.dtos.RegisterRequestDto;
+import com.task_manager.user_service.dtos.UserResponseDto;
 import com.task_manager.user_service.models.User;
 import com.task_manager.user_service.repositories.IUserRepository;
 
@@ -51,5 +52,16 @@ public class UserService {
 
         String token = jwtService.generateToken(user, user.getId());
         return new AuthResponseDto(token, user.getEmail(), user.getUsername());
+    }
+
+    public UserResponseDto getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail()
+        );
     }
 }

@@ -8,9 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.task_manager.user_service.dtos.AuthResponseDto;
 import com.task_manager.user_service.dtos.LoginRequestDto;
 import com.task_manager.user_service.dtos.RegisterRequestDto;
+import com.task_manager.user_service.dtos.UserResponseDto;
 import com.task_manager.user_service.services.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -30,6 +34,10 @@ public class UserController {
         return ResponseEntity.ok(service.login(request));
     }
     
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> getUserById(@RequestParam Long id) {
+        return ResponseEntity.ok(service.getUserById(id));
+    }
     
 
 }
