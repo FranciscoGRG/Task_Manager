@@ -18,107 +18,121 @@ import jakarta.transaction.Transactional;
 @Service
 public class TaskService {
 
-    @Autowired
-    private ITaskRepository taskRepository;
+        @Autowired
+        private ITaskRepository taskRepository;
 
-    @Autowired
-    private TaskEventPublisher taskEventPublisher;
+        @Autowired
+        private TaskEventPublisher taskEventPublisher;
 
-    @Autowired
-    private UserClient userClient;
+        @Autowired
+        private UserClient userClient;
 
-    public TaskResponseDto getTaskById(Long id) {
-        return taskRepository.findById(id)
-                .map(task -> new TaskResponseDto(task.getId(), task.getUserId(), task.getTitle(), task.getDescription(),
-                        task.getDueDate(), task.isCompleted(), task.getAttachmentUrl()))
-                .orElseThrow(() -> new RuntimeException("No se ha encontrado la tarea con el id: " + id));
-    }
-
-    public List<TaskResponseDto> getAllTasksByUserId(Long userId) {
-        List<Task> tasks = taskRepository.findByUserId(userId);
-
-        if (tasks.isEmpty()) {
-            throw new RuntimeException("No se han encontrado tareas");
+        public TaskResponseDto getTaskById(Long id) {
+                return taskRepository.findById(id)
+                                .map(task -> new TaskResponseDto(task.getId(), task.getUserId(), task.getTitle(),
+                                                task.getDescription(),
+                                                task.getDueDate(), task.isCompleted(), task.getAttachmentUrl()))
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No se ha encontrado la tarea con el id: " + id));
         }
 
-        return tasks.stream()
-                .map(task -> new TaskResponseDto(
-                        task.getId(),
-                        task.getUserId(),
-                        task.getTitle(),
-                        task.getDescription(),
-                        task.getDueDate(),
-                        task.isCompleted(),
-                        task.getAttachmentUrl()))
-                .toList();
-    }
+        public List<TaskResponseDto> getAllTasksByUserId(Long userId) {
+                List<Task> tasks = taskRepository.findByUserId(userId);
 
-    @Transactional
-    public TaskResponseDto saveTask(TaskRequestDto request, Long userId) {
-        UserDto user = userClient.getUserById(userId);
+                if (tasks.isEmpty()) {
+                        throw new RuntimeException("No se han encontrado tareas");
+                }
 
+                return tasks.stream()
+                                .map(task -> new TaskResponseDto(
+                                                task.getId(),
+                                                task.getUserId(),
+                                                task.getTitle(),
+                                                task.getDescription(),
+                                                task.getDueDate(),
+                                                task.isCompleted(),
+                                                task.getAttachmentUrl()))
+                                .toList();
+        }
 
-        Task task = new Task();
+        @Transactional
+        public TaskResponseDto saveTask(TaskRequestDto request, Long userId, String token) {
+                UserDto user = userClient.getUserById(userId, token);
 
-        task.setUserId(userId);
-        task.setTitle(request.title());
-        task.setDescription(request.description());
-        task.setDueDate(request.dueDate());
-        task.setCompleted(request.completed());
-        task.setAttachmentUrl(request.attachmentUrl());
+                Task task = new Task();
 
-        Task savedTask = taskRepository.save(task);
+                task.setUserId(userId);
+                task.setTitle(request.title());
+                task.setDescription(request.description());
+                task.setDueDate(request.dueDate());
+                task.setCompleted(request.completed());
+                task.setAttachmentUrl(request.attachmentUrl());
 
-        TaskEventDto taskEvent = new TaskEventDto(
-                "TASK_CREATED",
-                savedTask.getId(),
-                savedTask.getUserId(),
-                user.email(),
-                savedTask.getTitle(),
-                savedTask.getDescription(),
-                String.valueOf(savedTask.getDueDate())
-        );
+                Task savedTask = taskRepository.save(task);
 
-        taskEventPublisher.publishTaskEvent(taskEvent);
+                String payload = """
+                                {
+                                  "title": "%s",
+                                  "description": "%s",
+                                  "dueDate": "%s"
+                                }
+                                """.formatted(
+                                savedTask.getTitle(),
+                                savedTask.getDescription(),
+                                savedTask.getDueDate());
 
-        return new TaskResponseDto(
-                savedTask.getId(),
-                savedTask.getUserId(),
-                savedTask.getTitle(),
-                savedTask.getDescription(),
-                savedTask.getDueDate(),
-                savedTask.isCompleted(),
-                savedTask.getAttachmentUrl());
-    }
+                TaskEventDto taskEvent = new TaskEventDto(
+                                "TASK_CREATED",
+                                savedTask.getId(),
+                                savedTask.getUserId(),
+                                user.email(),
+                                savedTask.getTitle(),
+                                savedTask.getDescription(),
+                                String.valueOf(savedTask.getDueDate()),
+                                payload);
 
-    @Transactional
-    public void deleteTask(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se ha encontrado la tarea con el id: " + id));
+                taskEventPublisher.publishTaskEvent(taskEvent);
 
-        taskRepository.delete(task);
-    }
+                return new TaskResponseDto(
+                                savedTask.getId(),
+                                savedTask.getUserId(),
+                                savedTask.getTitle(),
+                                savedTask.getDescription(),
+                                savedTask.getDueDate(),
+                                savedTask.isCompleted(),
+                                savedTask.getAttachmentUrl());
+        }
 
-    @Transactional
-    public TaskResponseDto updateTask(Long id, TaskRequestDto request) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se ha encontrado la tarea con el id: " + id));
+        @Transactional
+        public void deleteTask(Long id) {
+                Task task = taskRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No se ha encontrado la tarea con el id: " + id));
 
-        task.setTitle(request.title());
-        task.setDescription(request.description());
-        task.setDueDate(request.dueDate());
-        task.setCompleted(request.completed());
-        task.setAttachmentUrl(request.attachmentUrl());
+                taskRepository.delete(task);
+        }
 
-        Task updatedTask = taskRepository.save(task);
+        @Transactional
+        public TaskResponseDto updateTask(Long id, TaskRequestDto request) {
+                Task task = taskRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No se ha encontrado la tarea con el id: " + id));
 
-        return new TaskResponseDto(
-                updatedTask.getId(),
-                updatedTask.getUserId(),
-                updatedTask.getTitle(),
-                updatedTask.getDescription(),
-                updatedTask.getDueDate(),
-                updatedTask.isCompleted(),
-                updatedTask.getAttachmentUrl());
-    }
+                task.setTitle(request.title());
+                task.setDescription(request.description());
+                task.setDueDate(request.dueDate());
+                task.setCompleted(request.completed());
+                task.setAttachmentUrl(request.attachmentUrl());
+
+                Task updatedTask = taskRepository.save(task);
+
+                return new TaskResponseDto(
+                                updatedTask.getId(),
+                                updatedTask.getUserId(),
+                                updatedTask.getTitle(),
+                                updatedTask.getDescription(),
+                                updatedTask.getDueDate(),
+                                updatedTask.isCompleted(),
+                                updatedTask.getAttachmentUrl());
+        }
 }

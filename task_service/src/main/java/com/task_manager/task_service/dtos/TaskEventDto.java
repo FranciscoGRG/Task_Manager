@@ -7,5 +7,6 @@ public record TaskEventDto(
     String userEmail,
     String title,
     String description,
-    String dueDate
+    String dueDate,
+    String payload
 ) {}

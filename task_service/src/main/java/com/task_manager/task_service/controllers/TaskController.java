@@ -42,8 +42,9 @@ public class TaskController {
     public ResponseEntity<TaskResponseDto> createTask(@RequestBody TaskRequestDto request,
             HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
+        String token = httpRequest.getHeader("Authorization");
 
-        return ResponseEntity.ok(taskService.saveTask(request, userId));
+        return ResponseEntity.ok(taskService.saveTask(request, userId, token));
     }
 
     @DeleteMapping("/{id}")
