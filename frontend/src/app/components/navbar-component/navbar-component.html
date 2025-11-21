@@ -8,18 +8,73 @@
         <div class="hidden md:flex gap-10">
             <a href="#"
                 class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">Features</a>
-            <a href="#" class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">How
-                it Works</a>
-            <a href="#"
-                class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">Pricing</a>
-        </div>
+            <nav class="fixed top-0 left-0 w-full z-50 py-4 transition-all duration-300 glass-effect">
+                <div class="max-w-7xl mx-auto px-8 flex justify-between items-center">
+                    <div
+                        class="text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight cursor-pointer">
+                        TaskMaster
+                    </div>
 
-        <div class="flex items-center gap-6">
-            <a href="#" class="text-text hover:text-primary font-semibold text-sm transition-colors">Log in</a>
-            <button
-                class="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:-translate-y-px hover:shadow-lg hover:bg-indigo-600 transition-all duration-300 shadow-md shadow-primary/30">
-                Get Started
-            </button>
-        </div>
-    </div>
-</nav>
+                    <div class="hidden md:flex gap-10">
+                        <a href="#"
+                            class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">Features</a>
+                        <a href="#"
+                            class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">How
+                            it Works</a>
+                        <a href="#"
+                            class="text-text-muted hover:text-text font-medium text-sm transition-colors duration-300">Pricing</a>
+                    </div>
+
+                    <div class="flex items-center gap-6">
+                        @if (authService.isLoggedIn()) {
+                        <div class="relative">
+                            <button (click)="toggleDropdown()" class="flex items-center gap-2 focus:outline-none">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-accent p-[2px]">
+                                    <div
+                                        class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                                        <img src="https://ui-avatars.com/api/?name={{authService.currentUser()?.username}}&background=random"
+                                            alt="Profile" class="w-full h-full object-cover">
+                                    </div>
+                                </div>
+                                <span
+                                    class="text-sm font-medium text-white hidden sm:block">{{authService.currentUser()?.username}}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 text-slate-400 transition-transform duration-200"
+                                    [class.rotate-180]="isDropdownOpen" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            @if (isDropdownOpen) {
+                            <div
+                                class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-xl shadow-lg py-1 border border-white/10 animate-fade-in z-50">
+                                <div class="px-4 py-3 border-b border-white/5">
+                                    <p class="text-sm text-white font-medium truncate">
+                                        {{authService.currentUser()?.username}}</p>
+                                    <p class="text-xs text-slate-400 truncate">{{authService.currentUser()?.email}}</p>
+                                </div>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors">Profile</a>
+                                <a href="#"
+                                    class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors">Settings</a>
+                                <div class="border-t border-white/5 my-1"></div>
+                                <button (click)="logout()"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                                    Sign out
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        } @else {
+                        <a routerLink="/login"
+                            class="text-text hover:text-primary font-semibold text-sm transition-colors">Log in</a>
+                        <button routerLink="/register"
+                            class="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:-translate-y-px hover:shadow-lg hover:bg-indigo-600 transition-all duration-300 shadow-md shadow-primary/30">
+                            Get Started
+                        </button>
+                        }
+                    </div>
+                </div>
+            </nav>
