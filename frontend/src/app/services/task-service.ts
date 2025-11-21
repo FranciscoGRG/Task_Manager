@@ -28,4 +28,9 @@ export class TaskService {
   getTasks(): Observable<TaskModel[]> {
     return this.http.get<TaskModel[]>(`${this.apiUrl}`);
   }
+
+  getAttachment(attachmentUrl: string): Observable<Blob> {
+    const baseUrl = 'http://localhost:8082';
+    return this.http.get(`${baseUrl}/${attachmentUrl}`, { responseType: 'blob' });
+  }
 }

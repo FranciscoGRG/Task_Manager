@@ -63,4 +63,22 @@ export class TaskComponent implements OnInit {
       },
     });
   }
+
+  downloadAttachment(attachmentUrl: string) {
+    this.taskService.getAttachment(attachmentUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = attachmentUrl.split('/').pop() || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error downloading attachment:', err);
+      }
+    });
+  }
 }

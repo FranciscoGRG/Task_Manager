@@ -22,15 +22,14 @@ public class FileStorageService {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
-   public String uploadFile(MultipartFile file, String key) {
+    public String uploadFile(MultipartFile file, String key) {
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
                             .build(),
-                    RequestBody.fromBytes(file.getBytes())
-            );
+                    RequestBody.fromBytes(file.getBytes()));
             return key;
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload file", e);
@@ -43,8 +42,7 @@ public class FileStorageService {
                     GetObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
-                            .build()
-            );
+                            .build());
         } catch (Exception e) {
             throw new RuntimeException("Failed to download file", e);
         }
@@ -52,5 +50,10 @@ public class FileStorageService {
 
     public URL getFileUrl(String key) {
         return null;
+    }
+
+    public InputStream getTaskAttachment(Long userId, String fileName) {
+        String key = "tasks/" + userId + "/" + fileName;
+        return downloadFile(key);
     }
 }

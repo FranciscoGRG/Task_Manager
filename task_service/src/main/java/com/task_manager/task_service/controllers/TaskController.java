@@ -3,6 +3,10 @@ package com.task_manager.task_service.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -11,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.task_manager.task_service.dtos.TaskRequestDto;
 import com.task_manager.task_service.dtos.TaskResponseDto;
+import com.task_manager.task_service.services.FileStorageService;
 import com.task_manager.task_service.services.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +33,9 @@ public class TaskController {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @GetMapping()
     public ResponseEntity<List<TaskResponseDto>> getAllTasksByUserId(HttpServletRequest httpRequest) {
@@ -47,7 +55,7 @@ public class TaskController {
             HttpServletRequest httpRequest) {
 
         Long userId = (Long) httpRequest.getAttribute("userId");
-        // Long userId = 2L;
+
         String token = httpRequest.getHeader("Authorization");
 
         TaskResponseDto responseDto = taskService.saveTask(request, userId, token,
@@ -65,6 +73,18 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id, @RequestBody TaskRequestDto request) {
         return ResponseEntity.ok(taskService.updateTask(id, request));
+    }
+
+    @GetMapping("/{userId}/{fileName:.+}")
+    public ResponseEntity<Resource> getAttachment(@PathVariable Long userId,
+            @PathVariable String fileName) {
+        java.io.InputStream inputStream = fileStorageService.getTaskAttachment(userId, fileName);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new InputStreamResource(inputStream));
     }
 
 }
