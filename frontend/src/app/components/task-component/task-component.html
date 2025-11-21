@@ -1,0 +1,135 @@
+<div class="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white">My Tasks</h1>
+                <p class="text-slate-400 mt-1">Manage your tasks and track your progress</p>
+            </div>
+            <button (click)="taskForm.reset()"
+                class="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors shadow-lg shadow-indigo-500/20">
+                <span class="text-xl">+</span> New Task
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Create Task Form (Left Column on large screens) -->
+            <div class="lg:col-span-1">
+                <div class="glass-card p-6 sticky top-28">
+                    <h2 class="text-xl font-semibold text-white mb-6">Create New Task</h2>
+
+                    <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="space-y-5">
+                        <!-- Title -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium text-slate-300">Title</label>
+                            <input formControlName="title" type="text"
+                                class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                                placeholder="Task title">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium text-slate-300">Description</label>
+                            <textarea formControlName="description" rows="3"
+                                class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                                placeholder="Task details..."></textarea>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium text-slate-300">Due Date</label>
+                            <input formControlName="dueDate" type="datetime-local"
+                                class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors [color-scheme:dark]">
+                        </div>
+
+                        <!-- Attachment -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium text-slate-300">Attachment</label>
+                            <div class="relative">
+                                <input type="file" (change)="onFileSelected($event)"
+                                    class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <!-- Completed Checkbox -->
+                        <div class="flex items-center gap-3 pt-2">
+                            <div class="relative flex items-center">
+                                <input formControlName="completed" type="checkbox" id="completed"
+                                    class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-white/10 bg-white/5 checked:border-indigo-500 checked:bg-indigo-500 transition-all">
+                                <svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white transition-opacity"
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <label for="completed" class="text-sm text-slate-300 cursor-pointer select-none">Mark as
+                                completed</label>
+                        </div>
+
+                        <button type="submit" [disabled]="taskForm.invalid"
+                            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 mt-4">
+                            Create Task
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Task List (Right Column on large screens) -->
+            <div class="lg:col-span-2 space-y-6">
+                @if (tasks().length === 0) {
+                <div class="glass-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+                    <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-3xl">📝</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">No tasks yet</h3>
+                    <p class="text-slate-400 max-w-sm">Create your first task to start tracking your productivity and
+                        goals.</p>
+                </div>
+                } @else {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @for (task of tasks(); track task.id) {
+                    <div class="glass-card p-5 hover:bg-white/5 transition-colors group relative overflow-hidden">
+                        <!-- Status Indicator Line -->
+                        <div class="absolute left-0 top-0 bottom-0 w-1" [class.bg-green-500]="task.completed"
+                            [class.bg-amber-500]="!task.completed"></div>
+
+                        <div class="flex justify-between items-start mb-3 pl-2">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium border"
+                                [class.bg-green-500/10]="task.completed" [class.text-green-400]="task.completed"
+                                [class.border-green-500/20]="task.completed" [class.bg-amber-500/10]="!task.completed"
+                                [class.text-amber-400]="!task.completed" [class.border-amber-500/20]="!task.completed">
+                                {{ task.completed ? 'Completed' : 'Pending' }}
+                            </span>
+                            @if (task.attachmentUrl) {
+                            <a [href]="task.attachmentUrl" target="_blank"
+                                class="text-slate-400 hover:text-indigo-400 transition-colors" title="View Attachment">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                            </a>
+                            }
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-white mb-2 pl-2 pr-8 truncate">{{ task.title }}</h3>
+                        <p class="text-slate-400 text-sm mb-4 pl-2 line-clamp-2">{{ task.description }}</p>
+
+                        <div class="flex items-center gap-2 text-xs text-slate-500 pl-2 mt-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>Due: {{ task.dueDate | date:'mediumDate' }}</span>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -46,8 +46,8 @@ public class TaskController {
             @RequestPart(value = "file", required = false) MultipartFile file,
             HttpServletRequest httpRequest) {
 
-        // Long userId = (Long) httpRequest.getAttribute("userId");
-        Long userId = 2L;
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        // Long userId = 2L;
         String token = httpRequest.getHeader("Authorization");
 
         TaskResponseDto responseDto = taskService.saveTask(request, userId, token,

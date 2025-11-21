@@ -12,11 +12,11 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")                // Todas las rutas
-                        .allowedOrigins("http://localhost:4200") // Origen del frontend
-                        .allowedMethods("*")              // GET, POST, PUT, DELETE...
-                        .allowedHeaders("*")              // Headers permitidos
-                        .allowCredentials(true);         // Si usas cookies o JWT
+                registry.addMapping("/**")                
+                        .allowedOrigins("http://localhost:4200") 
+                        .allowedMethods("*")             
+                        .allowedHeaders("*")              
+                        .allowCredentials(true);         
             }
         };
     }
