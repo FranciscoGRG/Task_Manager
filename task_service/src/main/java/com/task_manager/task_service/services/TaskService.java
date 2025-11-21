@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.task_manager.task_service.clients.UserClient;
 import com.task_manager.task_service.dtos.TaskEventDto;
@@ -26,6 +27,9 @@ public class TaskService {
 
         @Autowired
         private UserClient userClient;
+
+        @Autowired
+        private FileStorageService fileStorageService;
 
         public TaskResponseDto getTaskById(Long id) {
                 return taskRepository.findById(id)
@@ -56,7 +60,7 @@ public class TaskService {
         }
 
         @Transactional
-        public TaskResponseDto saveTask(TaskRequestDto request, Long userId, String token) {
+        public TaskResponseDto saveTask(TaskRequestDto request, Long userId, String token, MultipartFile file) {
                 UserDto user = userClient.getUserById(userId, token);
 
                 Task task = new Task();
@@ -66,7 +70,13 @@ public class TaskService {
                 task.setDescription(request.description());
                 task.setDueDate(request.dueDate());
                 task.setCompleted(request.completed());
-                task.setAttachmentUrl(request.attachmentUrl());
+
+                if (file != null && !file.isEmpty()) {
+                        String key = "tasks/" + userId + "/" + System.currentTimeMillis() + "-"
+                                        + file.getOriginalFilename();
+                        String fileUrl = fileStorageService.uploadFile(file, key);
+                        task.setAttachmentUrl(fileUrl);
+                }
 
                 Task savedTask = taskRepository.save(task);
 

@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.task_manager.task_service.dtos.TaskRequestDto;
 import com.task_manager.task_service.dtos.TaskResponseDto;
@@ -38,13 +40,19 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    @PostMapping()
-    public ResponseEntity<TaskResponseDto> createTask(@RequestBody TaskRequestDto request,
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<TaskResponseDto> createTask(
+            @RequestPart("task") TaskRequestDto request,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             HttpServletRequest httpRequest) {
+
         Long userId = (Long) httpRequest.getAttribute("userId");
         String token = httpRequest.getHeader("Authorization");
 
-        return ResponseEntity.ok(taskService.saveTask(request, userId, token));
+        TaskResponseDto responseDto = taskService.saveTask(request, userId, token,
+                file);
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{id}")
