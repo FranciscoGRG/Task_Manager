@@ -16,14 +16,19 @@ public class UserClient {
     @Autowired
     private RestTemplate restTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${user.service.url}")
+    private String userServiceUrl;
+
     public UserDto getUserById(Long userId, String token) {
+        // The endpoint /auth/{id} is public, so we don't strictly need the token.
+        // Removing it to avoid potential header issues (400 Bad Request).
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", token);
+        // headers.set("Authorization", token);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         ResponseEntity<UserDto> response = restTemplate.exchange(
-                "http://localhost:8081/auth/" + userId,
+                userServiceUrl + "/auth/" + userId,
                 HttpMethod.GET,
                 entity,
                 UserDto.class);

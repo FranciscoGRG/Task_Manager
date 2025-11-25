@@ -12,6 +12,13 @@ services:
       - "5433:5432"
     volumes:
       - user-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dev -d userdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   taskdb:
     image: postgres:15
@@ -24,6 +31,13 @@ services:
       - "5434:5432"
     volumes:
       - task-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dev -d taskdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   notifdb:
     image: postgres:15
@@ -36,9 +50,17 @@ services:
       - "5435:5432"
     volumes:
       - notif-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dev -d notifdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   minio:
     image: minio/minio
+    container_name: minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minio
@@ -48,9 +70,75 @@ services:
       - "9001:9001"
     volumes:
       - minio-data:/data
+    networks:
+      - task-network
+
+  user-service:
+    build: ./user_service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://userdb:5432/userdb
+      JWT_SECRET: "bXlfc3VwZXJfc2VjcmV0X2tleV9mb3Jfanp3dF9pbl9iYXNlNjQ="
+    depends_on:
+      userdb:
+        condition: service_healthy
+    networks:
+      - task-network
+
+  task-service:
+    build: ./task_service
+    container_name: task-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://taskdb:5432/taskdb
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083/notifications/send
+      AWS_S3_ENDPOINT: http://minio:9000
+      USER_SERVICE_URL: http://user-service:8081
+      JWT_SECRET: "bXlfc3VwZXJfc2VjcmV0X2tleV9mb3Jfanp3dF9pbl9iYXNlNjQ="
+    depends_on:
+      taskdb:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    networks:
+      - task-network
+
+  notification-service:
+    build: ./notification_service
+    container_name: notification-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notifdb:5432/notifdb
+    depends_on:
+      notifdb:
+        condition: service_healthy
+    networks:
+      - task-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - task-service
+    networks:
+      - task-network
 
 volumes:
   user-data:
   task-data:
   notif-data:
   minio-data:
+
+
+networks:
+  task-network:
+    driver: bridge
